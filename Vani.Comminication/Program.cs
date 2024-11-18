@@ -14,14 +14,11 @@ namespace Vani.Comminication
             var messageRateLimits = new MessageRateLimits();
             configuration.GetSection(IMessageRateLimits.CONFIG_SECTION_TITLE).Bind(messageRateLimits);
 
-            var builder = WebApplication.CreateBuilder(args);
-
-            
+            var builder = WebApplication.CreateBuilder(args);  
 
             // Add services to the container.
             builder.Services.AddTransient<IMessageRateLimits, MessageRateLimits>();
-
-            builder.Services.AddSingleton(new InMemoryRateLimiter(messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
+            builder.Services.AddSingleton<IRateLimiter>(new InMemoryRateLimiter(messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
             builder.Services.AddHostedService<CleanupService>();
 
             builder.Services.AddControllers();

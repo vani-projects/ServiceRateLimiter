@@ -8,14 +8,19 @@ namespace Vani.Comminication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RateLimitingController(IRateLimiter rateLimiter) : ControllerBase
+    public class RateLimitingController : ControllerBase
     {
-        private readonly IRateLimiter _rateLimiter = rateLimiter;
+        private readonly IRateLimiter _rateLimiter;
+
+        public RateLimitingController(IRateLimiter rateLimiter)
+        {
+            _rateLimiter = rateLimiter;
+        }
 
         [HttpGet("can-send")]
-        public IActionResult CanSend(string phoneNumber)
+        public async Task<IActionResult> CanSend(string phoneNumber)
         {
-            var canSend = _rateLimiter.CanSendFromNumber(phoneNumber);
+            var canSend = await _rateLimiter.CanSendFromNumber(phoneNumber);
             return Ok(new { canSend });
         }
     }

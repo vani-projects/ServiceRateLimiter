@@ -1,13 +1,14 @@
 ﻿
+using Vani.Comminication.Contracts;
 using Vani.Comminication.Helper;
 
 namespace Vani.Comminication.Service
 {
     public class CleanupService : BackgroundService
     {
-        private readonly InMemoryRateLimiter _rateLimiter;
+        private readonly IRateLimiter _rateLimiter;
 
-        public CleanupService(InMemoryRateLimiter rateLimiter)
+        public CleanupService(IRateLimiter rateLimiter)
         {
             _rateLimiter = rateLimiter;
         }
