@@ -1,4 +1,5 @@
 
+using StackExchange.Redis;
 using Vani.Comminication.Contracts;
 using Vani.Comminication.Helper;
 using Vani.Comminication.Repositories;
@@ -14,11 +15,15 @@ namespace Vani.Comminication
             var messageRateLimits = new MessageRateLimits();
             configuration.GetSection(IMessageRateLimits.CONFIG_SECTION_TITLE).Bind(messageRateLimits);
 
+            ConnectionMultiplexer _redis = ConnectionMultiplexer.Connect("localhost:6379,password=password");
+            IDatabase redisDB = _redis.GetDatabase();
+
             var builder = WebApplication.CreateBuilder(args);  
 
             // Add services to the container.
             builder.Services.AddTransient<IMessageRateLimits, MessageRateLimits>();
-            builder.Services.AddSingleton<IRateLimiter>(new InMemoryRateLimiter(messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
+            //builder.Services.AddSingleton<IRateLimiter>(new InMemoryRateLimiter(messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
+            builder.Services.AddSingleton<IRateLimiter>(new RedisRateLimiter(redisDB, messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
             builder.Services.AddHostedService<CleanupService>();
 
             builder.Services.AddControllers();
