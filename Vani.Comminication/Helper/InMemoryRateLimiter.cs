@@ -24,6 +24,8 @@ namespace Vani.Comminication.Helper
         {
             var numberCounter =  _numberLimits.GetOrAdd(phoneNumber, _ => new SlidingWindowCounter(_maxPerNumberPerSecond));
             var result = numberCounter.Increment() && _accountLimit.Increment();
+            var isSuccessful = Task.FromResult(result);
+            // Add a call to insert a record into the RateLimitServiceAuditLog 
             return await Task.FromResult(result);
         }
 

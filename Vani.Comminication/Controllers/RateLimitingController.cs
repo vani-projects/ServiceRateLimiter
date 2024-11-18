@@ -21,6 +21,7 @@ namespace Vani.Comminication.Controllers
         public async Task<IActionResult> CanSend(string phoneNumber)
         {
             var canSend = await _rateLimiter.CanSendFromNumber(phoneNumber);
+            
             return Ok(new { canSend });
         }
     }
