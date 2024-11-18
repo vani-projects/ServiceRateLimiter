@@ -20,7 +20,7 @@ namespace Vani.Comminication.Helper
         {
             var phoneKey = $"sms_limit:phone:{phoneNumber}";
             var accountKey = "sms_limit:account";
-
+            
             // Increment per-phone counter with expiry of 1 second
             var phoneCount = await _redis.StringIncrementAsync(phoneKey);
             if (phoneCount == 1) await _redis.KeyExpireAsync(phoneKey, TimeSpan.FromSeconds(1));
@@ -41,7 +41,7 @@ namespace Vani.Comminication.Helper
 
         public void CleanupInactiveNumbers(TimeSpan inactiveThreshold)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }
