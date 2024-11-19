@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vani.Comminication.Contracts;
+using Vani.Comminication.Service;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace Vani.Comminication.Controllers
+namespace Vani.Comminication.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
     public class RateLimitingController : ControllerBase
     {
-        private readonly IRateLimiter _rateLimiter;
+        private readonly IRateLimiterService _rateLimiter;
 
-        public RateLimitingController(IRateLimiter rateLimiter)
+        public RateLimitingController(IRateLimiterService rateLimiter)
         {
             _rateLimiter = rateLimiter;
         }

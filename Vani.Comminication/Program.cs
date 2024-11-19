@@ -1,8 +1,6 @@
 
 using StackExchange.Redis;
-using Vani.Comminication.Contracts;
-using Vani.Comminication.Helper;
-using Vani.Comminication.Repositories;
+using Vani.Comminication.Config;
 using Vani.Comminication.Service;
 
 namespace Vani.Comminication
@@ -12,18 +10,22 @@ namespace Vani.Comminication
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            var messageRateLimits = new MessageRateLimits();
-            configuration.GetSection(IMessageRateLimits.CONFIG_SECTION_TITLE).Bind(messageRateLimits);
+            var messageRateLimits = new MessageRateLimitsConfig();
+            configuration.GetSection(MessageRateLimitsConfig.CONFIG_SECTION_TITLE).Bind(messageRateLimits);
 
-            ConnectionMultiplexer _redis = ConnectionMultiplexer.Connect("localhost:6379,password=password");
-            IDatabase redisDB = _redis.GetDatabase();
+            var rateLimitsResourceExpiryInSeconds = Convert.ToInt32(configuration["RateLimitsResourceExpiryInSeconds"]);
 
-            var builder = WebApplication.CreateBuilder(args);  
+            var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddTransient<IMessageRateLimits, MessageRateLimits>();
-            //builder.Services.AddSingleton<IRateLimiter>(new InMemoryRateLimiter(messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
-            builder.Services.AddSingleton<IRateLimiter>(new RedisRateLimiter(redisDB, messageRateLimits.PhoneNumberRateLimit, messageRateLimits.AccountRateLimit));
+            // START: In-Memory dictionary as a store for keeping track of the call count
+            builder.Services.AddSingleton<IRateLimiterService, InMemoryRateLimiterService>();
+            // END: In-Memory dictionary as a store for keeping track of the call count
+
+            // START: Redis Cache as store for keeping track of the call count
+            // builder.Services.AddSingleton<IRateLimiterService,RedisRateLimiterService>();
+            // END:  Redis Cache as store for keeping track of the call count
+
             builder.Services.AddHostedService<CleanupService>();
 
             builder.Services.AddControllers();

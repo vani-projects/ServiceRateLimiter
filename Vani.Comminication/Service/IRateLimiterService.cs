@@ -1,6 +1,6 @@
-﻿namespace Vani.Comminication.Contracts
+﻿namespace Vani.Comminication.Service
 {
-    public interface IRateLimiter
+    public interface IRateLimiterService
     {
         Task<bool> CanSendFromNumber(string phoneNumber);
         void CleanupInactiveNumbers(TimeSpan inactiveThreshold);

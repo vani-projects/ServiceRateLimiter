@@ -1,24 +1,22 @@
-﻿
-using Vani.Comminication.Contracts;
-using Vani.Comminication.Helper;
-
-namespace Vani.Comminication.Service
+﻿namespace Vani.Comminication.Service
 {
     public class CleanupService : BackgroundService
     {
-        private readonly IRateLimiter _rateLimiter;
+        private readonly IRateLimiterService _rateLimiter;
+        private readonly int _cleanupInterval;
 
-        public CleanupService(IRateLimiter rateLimiter)
+        public CleanupService(IRateLimiterService rateLimiter, IConfiguration configuration)
         {
             _rateLimiter = rateLimiter;
+            _cleanupInterval = Convert.ToInt16(configuration["RateLimitsResourceExpiryInSeconds"]);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _rateLimiter.CleanupInactiveNumbers(TimeSpan.FromMinutes(10));
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                _rateLimiter.CleanupInactiveNumbers(TimeSpan.FromMinutes(_cleanupInterval));
+                await Task.Delay(TimeSpan.FromMinutes(_cleanupInterval), stoppingToken);
             }
         }
     }
