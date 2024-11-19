@@ -8,7 +8,6 @@ namespace Vani.Comminication.Service
         private readonly IDatabase _redis;
         private readonly int _maxPerNumberPerSecond;
         private readonly int _maxPerAccountPerSecond;
-        private readonly int _cacheExpiry;
         private const string REDIS_CONNECTION_STRING_KEY = "Redis";
 
         public RedisRateLimiterService(IConfiguration configuration)
@@ -21,7 +20,6 @@ namespace Vani.Comminication.Service
 
             _maxPerNumberPerSecond = messageRateLimits.PhoneNumberRateLimitPerSecond;
             _maxPerAccountPerSecond = messageRateLimits.AccountRateLimitIPerSecond;
-            _cacheExpiry = Convert.ToInt16(configuration["RateLimitsResourceExpiryInSeconds"]);
         }
 
         public async Task<bool> CanSendFromNumber(string phoneNumber)
@@ -31,11 +29,11 @@ namespace Vani.Comminication.Service
 
             // Increment per-phone counter with expiry of 1 second
             var phoneCount = await _redis.StringIncrementAsync(phoneKey);
-            if (phoneCount == 1) await _redis.KeyExpireAsync(phoneKey, TimeSpan.FromSeconds(_cacheExpiry));
+            if (phoneCount == 1) await _redis.KeyExpireAsync(phoneKey, TimeSpan.FromSeconds(1));
 
             // Increment account-wide counter with expiry of 1 second
             var accountCount = await _redis.StringIncrementAsync(accountKey);
-            if (accountCount == 1) await _redis.KeyExpireAsync(accountKey, TimeSpan.FromSeconds(_cacheExpiry));
+            if (accountCount == 1) await _redis.KeyExpireAsync(accountKey, TimeSpan.FromSeconds(1));
 
             if (phoneCount > _maxPerNumberPerSecond || accountCount > _maxPerAccountPerSecond)
             {
@@ -49,7 +47,7 @@ namespace Vani.Comminication.Service
 
         public void CleanupInactiveNumbers(TimeSpan inactiveThreshold)
         {
-            // Redis Cache takes care of the expiry by default, so not explicit cleanup is required
+            // Redis Cache takes care of the expiry by default (it expires the cache every second), so not explicit cleanup is required
         }
     }
 }
